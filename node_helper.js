@@ -43,7 +43,7 @@ module.exports = NodeHelper.create({
     const opts = {
       method: body ? "POST" : "GET",
       headers: { Accept: "application/json", "User-Agent": "MMM-DexcomOne" },
-      signal: AbortSignal.timeout(15000)
+      signal: AbortSignal.timeout(30000)
     };
     if (body) {
       opts.headers["Content-Type"] = "application/json";

@@ -14,6 +14,8 @@ Module.register("MMM-DexcomOne", {
     historyMinutes: 180,
     historyCount: 36,
     showGraph: true,
+    showErrors: false,     // mostrar en el espejo el último error (siempre quedan en el log)
+    align: "auto",         // "auto" (según la región), "left", "center" o "right"
     scale: 1               // tamaño: 0.5 = la mitad, 1 = normal, 1.5 = más grande
   },
 
@@ -55,14 +57,32 @@ Module.register("MMM-DexcomOne", {
     return "in-range";
   },
 
+  // Solo si se fuerza la alineación; con "auto" manda el CSS según la región
+  applyAlign (root) {
+    const presets = {
+      left: ["flex-start", "left", "0", "auto"],
+      center: ["center", "center", "auto", "auto"],
+      right: ["flex-end", "right", "auto", "0"]
+    };
+    const p = presets[this.config.align];
+    if (!p) return;
+    const [justify, text, ml, mr] = p;
+    root.style.setProperty("--dexcom-justify", justify);
+    root.style.setProperty("--dexcom-text", text);
+    root.style.setProperty("--dexcom-margin-left", ml);
+    root.style.setProperty("--dexcom-margin-right", mr);
+  },
+
   getDom () {
     const root = document.createElement("div");
     root.className = "dexcom";
     root.style.setProperty("--dexcom-scale", Number(this.config.scale) || 1);
+    this.applyAlign(root);
     const [last, prev] = this.values;
 
     if (!last) {
-      root.innerHTML = `<div class="dexcom-msg dimmed">${this.error || "Cargando glucosa…"}</div>`;
+      const msg = this.error && this.config.showErrors ? this.error : "Cargando glucosa…";
+      root.innerHTML = `<div class="dexcom-msg dimmed">${msg}</div>`;
       return root;
     }
 
@@ -89,7 +109,7 @@ Module.register("MMM-DexcomOne", {
         <span class="${stale ? "dexcom-warn" : "dimmed"}">${ageText}</span>
       </div>
       ${this.config.showGraph ? this.graph() : ""}
-      ${this.error ? `<div class="dexcom-msg dexcom-msg-sub dimmed">Último intento fallido: ${this.error}</div>` : ""}
+      ${this.error && this.config.showErrors ? `<div class="dexcom-msg dexcom-msg-sub dimmed">Último intento fallido: ${this.error}</div>` : ""}
     `;
     return root;
   },
