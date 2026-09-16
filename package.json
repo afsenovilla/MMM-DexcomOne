@@ -1,7 +1,7 @@
 {
   "name": "mmm-dexcomone",
   "version": "0.1.0",
-  "description": "Módulo de MagicMirror² que muestra la glucosa en tiempo real desde Dexcom Share",
+  "description": "MagicMirror² module that shows your live Dexcom glucose reading",
   "main": "MMM-DexcomOne.js",
   "author": "afsenovilla",
   "license": "MIT",
