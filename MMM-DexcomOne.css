@@ -25,3 +25,10 @@
 
 @keyframes dexcom-pulse { 50% { opacity: 0.45; } }
 @media (prefers-reduced-motion: reduce) { .dexcom.urgent-low .dexcom-value { animation: none; } }
+
+/* En las columnas de la izquierda, alineado a la izquierda */
+.region.left .dexcom { text-align: left; }
+.region.left .dexcom-reading,
+.region.left .dexcom-meta { justify-content: flex-start; }
+.region.left .dexcom-graph { margin: 12px auto 0 0; }
+.region.left .dexcom-msg { margin-left: 0; margin-right: auto; }
