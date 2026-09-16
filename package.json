@@ -1,0 +1,9 @@
+{
+  "name": "mmm-dexcomone",
+  "version": "0.1.0",
+  "description": "Módulo de MagicMirror² que muestra la glucosa en tiempo real desde Dexcom Share",
+  "main": "MMM-DexcomOne.js",
+  "author": "afsenovilla",
+  "license": "MIT",
+  "engines": { "node": ">=18" }
+}
