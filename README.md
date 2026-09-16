@@ -15,6 +15,7 @@ Tested with a Dexcom ONE+ in Spain. It should work with any Dexcom sensor whose 
 - Chart of the last 3 hours with your target range shaded
 - mg/dL or mmol/L
 - Aligns itself to the left or right depending on the region you place it in
+- Adjustable size with a single `scale` option
 - No dependencies
 
 ## Requirements
@@ -42,7 +43,8 @@ Add the module to the `modules` array in `~/MagicMirror/config/config.js`:
   config: {
     accountId: "12345678-90ab-cdef-1234-567890abcdef",
     password: "your-dexcom-password",
-    region: "ous"
+    region: "ous",
+    scale: 0.5
   }
 },
 ```
@@ -72,6 +74,7 @@ You can use `username` instead of `accountId`. The username can be your email, y
 | `historyMinutes` | `180` | How far back the chart goes, in minutes. |
 | `historyCount` | `36` | Maximum number of readings to fetch. |
 | `showGraph` | `true` | Show the chart below the value. |
+| `scale` | `1` | Overall size of the module. `0.5` is half size, `1.5` is 50% larger. Text, arrow and chart all scale together. |
 
 ## Updating
 

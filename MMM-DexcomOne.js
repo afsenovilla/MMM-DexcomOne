@@ -13,7 +13,8 @@ Module.register("MMM-DexcomOne", {
     updateInterval: 2.5 * 60 * 1000,
     historyMinutes: 180,
     historyCount: 36,
-    showGraph: true
+    showGraph: true,
+    scale: 1               // tamaño: 0.5 = la mitad, 1 = normal, 1.5 = más grande
   },
 
   arrows: {
@@ -57,10 +58,11 @@ Module.register("MMM-DexcomOne", {
   getDom () {
     const root = document.createElement("div");
     root.className = "dexcom";
+    root.style.setProperty("--dexcom-scale", Number(this.config.scale) || 1);
     const [last, prev] = this.values;
 
     if (!last) {
-      root.innerHTML = `<div class="dexcom-msg dimmed small">${this.error || "Cargando glucosa…"}</div>`;
+      root.innerHTML = `<div class="dexcom-msg dimmed">${this.error || "Cargando glucosa…"}</div>`;
       return root;
     }
 
@@ -81,13 +83,13 @@ Module.register("MMM-DexcomOne", {
         <span class="dexcom-value">${this.fmt(last.value)}</span>
         <span class="dexcom-arrow">${stale ? "" : this.arrows[last.trend] ?? ""}</span>
       </div>
-      <div class="dexcom-meta small">
+      <div class="dexcom-meta">
         <span class="bright">${this.config.units}</span>
         ${delta ? `<span>${delta}</span>` : ""}
         <span class="${stale ? "dexcom-warn" : "dimmed"}">${ageText}</span>
       </div>
       ${this.config.showGraph ? this.graph() : ""}
-      ${this.error ? `<div class="dexcom-msg xsmall dimmed">Último intento fallido: ${this.error}</div>` : ""}
+      ${this.error ? `<div class="dexcom-msg dexcom-msg-sub dimmed">Último intento fallido: ${this.error}</div>` : ""}
     `;
     return root;
   },
@@ -97,6 +99,7 @@ Module.register("MMM-DexcomOne", {
     const pts = this.values.slice().reverse();
     if (pts.length < 2) return "";
     const W = 220, H = 60, now = Date.now();
+    const k = Number(this.config.scale) || 1;
     const span = this.config.historyMinutes * 60000;
     const min = 40, max = 300;
     const x = (t) => W - ((now - t) / span) * W;
@@ -108,6 +111,6 @@ Module.register("MMM-DexcomOne", {
       .map((p) => `<circle cx="${x(p.time).toFixed(1)}" cy="${y(p.value).toFixed(1)}" r="2"
         class="dexcom-dot ${this.rangeClass(p.value)}"/>`)
       .join("");
-    return `<svg class="dexcom-graph" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${band}${dots}</svg>`;
+    return `<svg class="dexcom-graph" viewBox="0 0 ${W} ${H}" width="${W * k}" height="${H * k}">${band}${dots}</svg>`;
   }
 });
