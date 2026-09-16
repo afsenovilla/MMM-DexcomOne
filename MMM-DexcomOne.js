@@ -11,6 +11,7 @@ Module.register("MMM-DexcomOne", {
     urgentLow: 55,
     staleMinutes: 15,
     updateInterval: 2.5 * 60 * 1000,
+    retryInterval: 60 * 1000,  // si falla una consulta, se reintenta pasado este tiempo
     historyMinutes: 180,
     historyCount: 36,
     showGraph: true,

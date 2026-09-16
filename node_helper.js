@@ -25,6 +25,7 @@ module.exports = NodeHelper.create({
     this.sessionId = null;
     this.accountId = null;
     this.timer = null;
+    this.run = 0;
   },
 
   socketNotificationReceived (notification, config) {
@@ -34,9 +35,17 @@ module.exports = NodeHelper.create({
     this.server = SERVERS[region] + BASE_PATH;
     this.appId = APP_IDS[region];
     this.accountId = config.accountId || null;
-    if (this.timer) clearInterval(this.timer);
-    this.poll();
-    this.timer = setInterval(() => this.poll(), config.updateInterval);
+    if (this.timer) clearTimeout(this.timer);
+    this.run++; // si se recarga el espejo, la cadena anterior deja de programarse
+    this.poll(this.run);
+  },
+
+  // Tras una lectura correcta espera updateInterval; si falla, reintenta en retryInterval
+  schedule (ok, run) {
+    if (run !== this.run) return;
+    if (this.timer) clearTimeout(this.timer);
+    const wait = ok ? this.config.updateInterval : this.config.retryInterval;
+    this.timer = setTimeout(() => this.poll(run), wait);
   },
 
   async request (path, body) {
@@ -93,7 +102,7 @@ module.exports = NodeHelper.create({
     return { value: raw.Value, trend, time: ms };
   },
 
-  async poll () {
+  async poll (run) {
     try {
       if (!this.sessionId) await this.login();
       let data;
@@ -106,12 +115,16 @@ module.exports = NodeHelper.create({
         data = await this.readings();
       }
       const values = (Array.isArray(data) ? data : []).map((r) => this.parse(r));
+      if (values.length === 0) throw new Error("Dexcom no ha devuelto lecturas");
       this.sendSocketNotification("DEXCOM_DATA", { values });
+      this.schedule(true, run);
     } catch (e) {
-      Log.error(`[MMM-DexcomOne] ${e.code} ${e.message}`);
+      const retry = Math.round(this.config.retryInterval / 1000);
+      Log.warn(`[MMM-DexcomOne] ${e.code} ${e.message}. Reintento en ${retry} s`);
       if (/Account/i.test(e.code)) this.accountId = this.config.accountId || null;
       this.sessionId = null;
       this.sendSocketNotification("DEXCOM_ERROR", { message: e.message });
+      this.schedule(false, run);
     }
   }
 });

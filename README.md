@@ -72,6 +72,7 @@ You can use `username` instead of `accountId`. The username can be your email, y
 | `urgentLow` | `55` | At or below this value the reading pulses. Always in mg/dL. |
 | `staleMinutes` | `15` | Minutes after which a reading is considered out of date. |
 | `updateInterval` | `150000` | How often to fetch new readings, in milliseconds (2.5 minutes). |
+| `retryInterval` | `60000` | If a request fails, wait this long before trying again, in milliseconds (1 minute). |
 | `historyMinutes` | `180` | How far back the chart goes, in minutes. |
 | `historyCount` | `36` | Maximum number of readings to fetch. |
 | `showGraph` | `true` | Show the chart below the value. |
@@ -96,7 +97,7 @@ The module uses the same Dexcom web services as the Dexcom source in [Nightscout
 2. `LoginPublisherAccountById` opens a session.
 3. `ReadPublisherLatestGlucoseValues` fetches the latest readings.
 
-The session is reused between updates and renewed automatically when it expires. All requests are made by MagicMirror's server on your own device. Your credentials are only sent to Dexcom.
+The session is reused between updates and renewed automatically when it expires. If a request fails, the module keeps showing the last reading and tries again after `retryInterval`. All requests are made by MagicMirror's server on your own device. Your credentials are only sent to Dexcom.
 
 ## Troubleshooting
 
