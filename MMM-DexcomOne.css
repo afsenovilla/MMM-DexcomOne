@@ -1,73 +1,140 @@
-/* Todo el tamaño depende de --dexcom-scale (opción "scale" en config.js) */
+/*
+ * MMM-DexcomOne
+ *
+ * Tamaño: todo depende de --dexcom-scale (opción "scale").
+ * Alineación: la decide la región donde está el módulo, salvo que se fuerce con
+ * la opción "align", que el JS aplica como variables en línea.
+ *   izquierda (top_left, bottom_left)       → a la izquierda
+ *   derecha   (top_right, bottom_right)     → a la derecha
+ *   centro    (*_center, *_third, *_bar)    → centrado
+ */
+
 .dexcom {
   --dexcom-scale: 1;
-  text-align: right;
+  /* Cuánto se sube la flecha para centrarla con las cifras (en em de la flecha) */
+  --dexcom-arrow-lift: 0.27em;
+  /* Por defecto, a la izquierda */
+  --dexcom-justify: flex-start;
+  --dexcom-text: left;
+  --dexcom-margin-left: 0;
+  --dexcom-margin-right: auto;
+
+  text-align: var(--dexcom-text);
   line-height: 1;
 }
+
+.region.right .dexcom {
+  --dexcom-justify: flex-end;
+  --dexcom-text: right;
+  --dexcom-margin-left: auto;
+  --dexcom-margin-right: 0;
+}
+
+.region.center .dexcom,
+.region.third .dexcom,
+.region.bar .dexcom {
+  --dexcom-justify: center;
+  --dexcom-text: center;
+  --dexcom-margin-left: auto;
+  --dexcom-margin-right: auto;
+}
+
+/* Bloques */
 
 .dexcom-reading {
   display: flex;
   align-items: baseline;
-  justify-content: flex-end;
+  justify-content: var(--dexcom-justify);
   gap: 0.15em;
 }
+
 .dexcom-value {
   font-size: calc(72px * var(--dexcom-scale));
+  line-height: 1;
   font-weight: 300;
   color: #fff;
   font-variant-numeric: tabular-nums;
 }
+
+/*
+ * Las cifras y la flecha comparten línea base. Una flecha queda centrada en el eje
+ * matemático (~0,25 em sobre la base) y las cifras en la mitad de su altura (~0,35 em),
+ * así que se sube la flecha la diferencia para que su centro coincida con el de las cifras.
+ */
 .dexcom-arrow {
+  display: inline-block;
   font-size: calc(48px * var(--dexcom-scale));
   font-weight: 300;
-  min-width: 0.9em;
-  text-align: left;
+  line-height: 1;
+  transform: translateY(calc(-1 * var(--dexcom-arrow-lift)));
 }
 
 .dexcom-meta {
   display: flex;
-  justify-content: flex-end;
+  justify-content: var(--dexcom-justify);
   gap: 0.8em;
   margin-top: calc(6px * var(--dexcom-scale));
   font-size: calc(20px * var(--dexcom-scale));
 }
 
-/* Color por rango: solo la cifra y la flecha cambian, el resto queda sobrio */
-.dexcom.in-range .dexcom-arrow { color: #9fd8b5; }
-.dexcom.high .dexcom-value, .dexcom.high .dexcom-arrow { color: #f2c46d; }
-.dexcom.low .dexcom-value, .dexcom.low .dexcom-arrow { color: #f28b82; }
-.dexcom.urgent-low .dexcom-value, .dexcom.urgent-low .dexcom-arrow { color: #ff5a4f; }
-.dexcom.urgent-low .dexcom-value { animation: dexcom-pulse 2s ease-in-out infinite; }
-.dexcom.stale .dexcom-value { color: #666; text-decoration: line-through; text-decoration-thickness: 2px; }
-.dexcom-warn { color: #f2c46d; }
-
 .dexcom-graph {
   display: block;
-  margin: calc(12px * var(--dexcom-scale)) 0 0 auto;
+  margin-top: calc(12px * var(--dexcom-scale));
+  margin-left: var(--dexcom-margin-left);
+  margin-right: var(--dexcom-margin-right);
   overflow: visible;
 }
-.dexcom-band { fill: rgba(255, 255, 255, 0.07); }
-.dexcom-dot { fill: #bbb; }
-.dexcom-dot.high { fill: #f2c46d; }
-.dexcom-dot.low, .dexcom-dot.urgent-low { fill: #f28b82; }
 
 .dexcom-msg {
-  margin-top: calc(8px * var(--dexcom-scale));
   max-width: calc(260px * var(--dexcom-scale));
-  margin-left: auto;
+  margin-top: calc(8px * var(--dexcom-scale));
+  margin-left: var(--dexcom-margin-left);
+  margin-right: var(--dexcom-margin-right);
   line-height: 1.3;
   font-size: calc(20px * var(--dexcom-scale));
 }
-.dexcom-msg-sub { font-size: calc(15px * var(--dexcom-scale)); }
 
-@keyframes dexcom-pulse { 50% { opacity: 0.45; } }
+.dexcom-msg-sub {
+  font-size: calc(15px * var(--dexcom-scale));
+}
+
+/* Estados: solo la cifra y la flecha cambian de color */
+
+.dexcom.in-range .dexcom-arrow { color: #9fd8b5; }
+
+.dexcom.high .dexcom-value,
+.dexcom.high .dexcom-arrow { color: #f2c46d; }
+
+.dexcom.low .dexcom-value,
+.dexcom.low .dexcom-arrow { color: #f28b82; }
+
+.dexcom.urgent-low .dexcom-value,
+.dexcom.urgent-low .dexcom-arrow { color: #ff5a4f; }
+
+.dexcom.urgent-low .dexcom-value {
+  animation: dexcom-pulse 2s ease-in-out infinite;
+}
+
+.dexcom.stale .dexcom-value {
+  color: #666;
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+
+.dexcom-warn { color: #f2c46d; }
+
+/* Gráfica */
+
+.dexcom-band { fill: rgba(255, 255, 255, 0.07); }
+.dexcom-dot { fill: #bbb; }
+.dexcom-dot.high { fill: #f2c46d; }
+.dexcom-dot.low,
+.dexcom-dot.urgent-low { fill: #f28b82; }
+
+@keyframes dexcom-pulse {
+  50% { opacity: 0.45; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .dexcom.urgent-low .dexcom-value { animation: none; }
 }
-
-/* En las columnas de la izquierda, alineado a la izquierda */
-.region.left .dexcom { text-align: left; }
-.region.left .dexcom-reading,
-.region.left .dexcom-meta { justify-content: flex-start; }
-.region.left .dexcom-graph { margin-left: 0; margin-right: auto; }
-.region.left .dexcom-msg { margin-left: 0; margin-right: auto; }
